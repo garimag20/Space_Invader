@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 # initialize the pygame
 pygame.init()
 
@@ -11,7 +12,7 @@ SCREEN = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
 # Background
 background = pygame.image.load('background.png')
 
-#Title and icon
+# Title and icon
 pygame.display.set_caption("Space Invaders")
 icon = pygame.image.load('ufo.png')
 pygame.display.set_icon(icon)
@@ -24,7 +25,7 @@ playerX_change = 0
 
 # Enemy
 enemyImg = pygame.image.load('enemy.png')
-enemyX = random.randint(0, 800)
+enemyX = random.randint(0, 736)
 enemyY = random.randint(50, 150)
 enemyX_change = 3.5
 enemyY_change = 40
@@ -39,14 +40,13 @@ bulletX_change = 3.5
 bulletY_change = 10
 bullet_state = "ready"
 
-
-def enemy(x, y):
-    SCREEN.blit(enemyImg, (x, y))
-
+score = 0
 
 def player(x, y):
     SCREEN.blit(playerImg, (x, y))
 
+def enemy(x, y):
+    SCREEN.blit(enemyImg, (x, y))
 
 def fire_bullet(x, y):
     global bullet_state
@@ -54,8 +54,16 @@ def fire_bullet(x, y):
     SCREEN.blit(bulletImg, (x+16, y+10))
 
 
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt((math.pow(enemyX - bulletX, 2)) + (math.pow(enemyY - bulletY, 2)))
+    if distance < 27 :
+        return True
+    else:
+        return False
+
+
 # Game loop
-running = True
+running=True
 while running:
     # changing background color-RGB
     SCREEN.fill((0, 0, 0))
@@ -63,47 +71,57 @@ while running:
     SCREEN.blit(background, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            running=False
 
         # if keystroke pressed is left or right arrow key
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                playerX_change = -2
+                playerX_change=-2
             if event.key == pygame.K_RIGHT:
-                playerX_change = 2
+                playerX_change=2
             if event.key == pygame.K_SPACE:
                 if bullet_state is "ready":
-                    bulletX = playerX
+                    bulletX=playerX
                     fire_bullet(bulletX, bulletY)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                playerX_change = 0
+                playerX_change=0
 
     # checking for boundaries such that spaceship doesn't go out of bounds
     playerX += playerX_change
     if playerX <= 0:
-        playerX = 0
+        playerX=0
     elif playerX >= 736:  # 800-64 ->64 - size of spaceship
-        playerX = 736
+        playerX=736
 
     # enemy
     enemyX += enemyX_change
     if enemyX <= 0:
-        enemyX_change = 4
+        enemyX_change=4
         enemyY += enemyY_change
     elif enemyX >= 736:
-        enemyX_change = -4
+        enemyX_change=-4
         enemyY += enemyY_change
 
     # Bullet Movement
     if bulletY <= 0:
-        bulletY = 480
-        bullet_state = "ready"
+        bulletY=480
+        bullet_state="ready"
 
     if bullet_state is "fire":
         fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_change
+
+    #Collision 
+    collision = isCollision(enemyX, enemyY, bulletX, bulletY)
+    if collision:
+        bulletY = 480
+        bullet_state = "ready"
+        score += 1
+        print(score)
+        enemyX = random.randint(0, 800)
+        enemyY = random.randint(50, 150)
 
     player(playerX, playerY)
     enemy(enemyX, enemyY)
