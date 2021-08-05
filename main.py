@@ -40,7 +40,7 @@ num_of_enemies = 6
 
 for i in range(num_of_enemies):
     enemyImg.append(pygame.image.load('enemy.png'))
-    enemyX.append(random.randint(0, 736))
+    enemyX.append(random.randint(0, 735))
     enemyY.append(random.randint(50, 150))
     enemyX_change.append(3.5)
     enemyY_change.append(40)
@@ -62,10 +62,17 @@ font = pygame.font.Font('freesansbold.ttf', 32)
 textX = 10
 textY = 10
 
+#Game Over text
+over_font = pygame.font.Font('freesansbold.ttf', 64)
 
 def show_score(x, y):
     score = font.render("Score :" + str(score_value), True, (255, 255, 255))
     SCREEN.blit(score, (x,y))
+
+
+def game_over_text():
+    over_text = over_font.render("GAME OVER :" + str(score_value), True, (255, 255, 255))
+    SCREEN.blit(over_text, (220, 250))
 
 def player(x, y):
     SCREEN.blit(playerImg, (x, y))
@@ -125,6 +132,15 @@ while running:
 
     # enemy movement
     for i in range(num_of_enemies):
+
+        #Game Over
+        if enemyY[i] > 420:
+            for j in range(num_of_enemies):
+                enemyY[j] = 2000
+            game_over_text()
+            break
+
+        #Movement
         enemyX[i] += enemyX_change[i]
         if enemyX[i] <= 0:
             enemyX_change[i] = 4.5
